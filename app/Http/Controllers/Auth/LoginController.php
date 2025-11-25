@@ -13,30 +13,25 @@ class LoginController extends Controller
         return view('auth.login');
     }
 
-    public function login(Request $request)
-    {
-        // Ambil email & password
-        $credentials = $request->only('email', 'password');
+public function login(Request $request)
+{
+    $request->validate([
+        'email'    => 'required|email',
+        'password' => 'required',
+    ]);
 
-        // Coba login
-        if (Auth::attempt($credentials)) {
+    if (Auth::attempt($request->only('email', 'password'))) {
+        $user = Auth::user();
 
-            $user = Auth::user(); // data user
-
-            // Cek role admin
-            if ($user->role === 'admin') {
-                return redirect('/admin/dashboard');
-            }
-
-            // Jika bukan admin -> warga
-            return redirect('/warga/dashboard');
-        }
-
-        // Jika gagal login
-        return back()->withErrors([
-            'email' => 'Email atau password salah.'
-        ]);
+        return $user->role === 'admin'
+            ? redirect('/admin/dashboard')
+            : redirect('/warga/dashboard');
     }
+
+    return back()->withErrors([
+        'email' => 'Email atau password salah.'
+    ]);
+}
 
     public function logout()
     {

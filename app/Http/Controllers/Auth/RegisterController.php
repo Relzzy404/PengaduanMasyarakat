@@ -16,16 +16,23 @@ class RegisterController extends Controller
     }
 
     public function register(Request $request)
-    {
-        $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-            'role' => "warga", 
-        ]);
+{
+    $request->validate([
+        'name'     => 'required|string|min:3',
+        'email'    => 'required|email|unique:users,email',
+        'password' => 'required|min:6',
+    ]);
 
-        Auth::login($user);
+    $user = User::create([
+        'name' => $request->name,
+        'email' => $request->email,
+        'password' => Hash::make($request->password),
+        'role' => "warga", 
+    ]);
 
-        return redirect('/warga/dashboard');
-    }
+    Auth::login($user);
+
+    return redirect('/warga/dashboard');
+}
+
 }
